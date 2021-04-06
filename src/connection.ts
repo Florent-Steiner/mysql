@@ -45,6 +45,7 @@ export class Connection {
   state: ConnectionState = ConnectionState.CONNECTING;
   capabilities: number = 0;
   serverVersion: string = "";
+  clientConfig: ClientConfig
 
   private conn?: Deno.Conn = undefined;
   private _timedOut = false;
@@ -55,7 +56,9 @@ export class Connection {
       : `${this.config.hostname}:${this.config.port}`;
   }
 
-  constructor(readonly config: ClientConfig) {}
+  constructor(readonly config: ClientConfig) {
+    this.clientConfig = config
+  }
 
   private async _connect() {
     // TODO: implement connect timeout
@@ -249,7 +252,7 @@ export class Connection {
    * @param sql sql string
    * @param params query params
    */
-  async execute(sql: string, params?: any[]): Promise<ExecuteResult> {
+  async execute(sql: string, params?: any[], resultAsArray =false): Promise<ExecuteResult> {
     if (this.state != ConnectionState.CONNECTED) {
       if (this.state == ConnectionState.CLOSED) {
         throw new ConnnectionError("Connection is closed");
@@ -294,7 +297,7 @@ export class Connection {
         if (receive.type === PacketType.EOF_Packet) {
           break;
         } else {
-          const row = parseRow(receive.body, fields);
+          const row = parseRow(receive.body, fields, this.clientConfig.convertType || true, resultAsArray);
           rows.push(row);
         }
       }

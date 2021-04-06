@@ -28,6 +28,8 @@ export interface ClientConfig {
   idleTimeout?: number;
   /** charset */
   charset?: string;
+  /** Convert Type (default: true) */
+  convertType?: boolean;
 }
 
 /** Transaction processor */
@@ -66,6 +68,7 @@ export class Client {
       poolSize: 1,
       timeout: 30 * 1000,
       idleTimeout: 4 * 3600 * 1000,
+      convertType: true,
       ...config,
     };
     Object.freeze(this.config);
@@ -92,9 +95,9 @@ export class Client {
    * @param sql sql string
    * @param params query params
    */
-  async execute(sql: string, params?: any[]): Promise<ExecuteResult> {
+  async execute(sql: string, params?: any[], resultAsArray =false): Promise<ExecuteResult> {
     return await this.useConnection(async (connection) => {
-      return await connection.execute(sql, params);
+      return await connection.execute(sql, params, resultAsArray);
     });
   }
 
