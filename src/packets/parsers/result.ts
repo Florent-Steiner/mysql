@@ -102,6 +102,9 @@ function convertType(field: FieldInfo, val: string): any {
     case MYSQL_TYPE_NEWDECIMAL:
       return val; // #42 MySQL's decimal type cannot be accurately represented by the Number.
     case MYSQL_TYPE_TINY:
+      if (fieldLen == 1) {
+        return val=='0' ? false : true
+      }
     case MYSQL_TYPE_SHORT:
     case MYSQL_TYPE_LONG:
     case MYSQL_TYPE_INT24:
